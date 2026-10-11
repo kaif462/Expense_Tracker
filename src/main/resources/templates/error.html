@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Something went wrong')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${username})}"></header>
+
+<main class="narrow">
+    <h1 th:text="${status == 404} ? 'We could not find that' : 'Something went wrong'">Something went wrong</h1>
+    <p class="lede"
+       th:text="${message != null and !#strings.isEmpty(message)} ? ${message} : 'Try again in a moment, or head back to your expenses.'">
+        Try again in a moment, or head back to your expenses.
+    </p>
+    <a class="btn btn-primary" th:href="@{/expenses}">Back to expenses</a>
+</main>
+</body>
+</html>

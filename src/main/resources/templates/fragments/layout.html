@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | Expense Tracker'">Expense Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<header class="topbar" th:fragment="navbar(username)">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Expense Tracker</a>
+        <div class="topbar-user" th:if="${username != null}">
+            <span class="who" th:text="${username}">alex</span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-ghost btn-small">Sign out</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<div th:fragment="flash" th:if="${success != null}" class="notice notice-success" role="status" th:text="${success}">
+    Saved.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Expenses')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${username})}"></header>
+
+<main>
+    <div class="page-head">
+        <h1>Expenses</h1>
+        <a class="btn btn-primary" th:href="@{/expenses/new}">Add expense</a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <!-- Summary -->
+    <section class="summary" aria-label="Spending summary">
+        <div class="summary-figure">
+            <p class="summary-label" th:text="${filtered} ? 'Total for these filters' : 'Total spent'">Total spent</p>
+            <p class="summary-total"
+               th:text="${currency} + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            <p class="summary-meta"
+               th:text="|${expenses.size()} ${expenses.size() == 1 ? 'expense' : 'expenses'} in ${summaries.size()} ${summaries.size() == 1 ? 'category' : 'categories'}|">
+                0 expenses
+            </p>
+        </div>
+
+        <div class="breakdown" th:if="${!summaries.isEmpty()}">
+            <p class="breakdown-title">Where it went</p>
+            <div class="bar" role="img" aria-label="Spending split by category">
+                <span th:each="c, stat : ${summaries}"
+                      th:class="'seg c' + ${stat.index % 8}"
+                      th:style="'flex-grow:' + ${c.total().toPlainString()}"
+                      th:title="|${c.name()}: ${currency}${#numbers.formatDecimal(c.total(), 1, 'COMMA', 2, 'POINT')}|"></span>
+            </div>
+            <ul class="legend">
+                <li th:each="c, stat : ${summaries}">
+                    <span th:class="'swatch c' + ${stat.index % 8}"></span>
+                    <span class="legend-name" th:text="${c.name()}">Food</span>
+                    <span class="legend-value"
+                          th:text="|${currency}${#numbers.formatDecimal(c.total(), 1, 'COMMA', 2, 'POINT')} (${#numbers.formatDecimal(c.percent(), 1, 0)}%)|">$0.00</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <form class="filters" th:action="@{/expenses}" method="get">
+        <div class="field">
+            <label for="category">Category</label>
+            <select id="category" name="category">
+                <option value="">All categories</option>
+                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"
+                        th:selected="${c.equalsIgnoreCase(selectedCategory)}">Food</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="startDate">From</label>
+            <input type="date" id="startDate" name="startDate" th:value="${startDate}">
+        </div>
+        <div class="field">
+            <label for="endDate">To</label>
+            <input type="date" id="endDate" name="endDate" th:value="${endDate}">
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary">Apply filters</button>
+            <a class="btn btn-ghost" th:href="@{/expenses}" th:if="${filtered}">Clear</a>
+        </div>
+    </form>
+
+    <!-- Empty states -->
+    <section class="empty card" th:if="${expenses.isEmpty() and !filtered}">
+        <h2>No expenses yet</h2>
+        <p>Add your first expense and it will show up here with a breakdown by category.</p>
+        <a class="btn btn-primary" th:href="@{/expenses/new}">Add expense</a>
+    </section>
+
+    <section class="empty card" th:if="${expenses.isEmpty() and filtered}">
+        <h2>Nothing matches these filters</h2>
+        <p>Try a wider date range or a different category.</p>
+        <a class="btn btn-secondary" th:href="@{/expenses}">Clear filters</a>
+    </section>
+
+    <!-- Ledger -->
+    <div class="table-wrap card" th:if="${!expenses.isEmpty()}">
+        <table class="ledger">
+            <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Expense</th>
+                <th scope="col">Category</th>
+                <th scope="col" class="num">Amount</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${expenses}">
+                <td class="date" th:text="${#temporals.format(e.date, 'd MMM yyyy')}">1 Jan 2026</td>
+                <td class="cell-title">
+                    <span class="item-title" th:text="${e.title}">Lunch</span>
+                    <span class="item-notes" th:if="${e.notes != null and !e.notes.isBlank()}" th:text="${e.notes}">Notes</span>
+                </td>
+                <td class="cell-category"><span class="pill" th:text="${e.category}">Food</span></td>
+                <td class="num"
+                    th:text="${currency} + ${#numbers.formatDecimal(e.amount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                <td class="row-actions">
+                    <a class="link" th:href="@{/expenses/{id}/edit(id=${e.id})}">Edit</a>
+                    <form th:action="@{/expenses/{id}/delete(id=${e.id})}" method="post"
+                          onsubmit="return confirm('Delete this expense? This cannot be undone.')">
+                        <button type="submit" class="link link-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

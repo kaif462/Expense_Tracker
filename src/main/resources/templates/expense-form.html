@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${username})}"></header>
+
+<main class="narrow">
+    <p class="crumb"><a th:href="@{/expenses}">Back to expenses</a></p>
+    <h1 th:text="${pageTitle}">Add expense</h1>
+
+    <form class="card form" th:action="@{${formAction}}" th:object="${expenseRequest}" method="post" novalidate>
+        <div class="field">
+            <label for="title">Title</label>
+            <input type="text" id="title" th:field="*{title}" maxlength="255" autofocus
+                   placeholder="e.g. Lunch with Sam"
+                   th:classappend="${#fields.hasErrors('title')} ? 'invalid'">
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Error</p>
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" th:field="*{amount}" step="0.01" min="0.01" inputmode="decimal"
+                       placeholder="0.00"
+                       th:classappend="${#fields.hasErrors('amount')} ? 'invalid'">
+                <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Error</p>
+            </div>
+
+            <div class="field">
+                <label for="date">Date</label>
+                <input type="date" id="date" th:field="*{date}"
+                       th:classappend="${#fields.hasErrors('date')} ? 'invalid'">
+                <p class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">Error</p>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="category">Category</label>
+            <input type="text" id="category" th:field="*{category}" list="category-options" maxlength="255"
+                   placeholder="Choose or type your own"
+                   th:classappend="${#fields.hasErrors('category')} ? 'invalid'">
+            <datalist id="category-options">
+                <option th:each="c : ${categorySuggestions}" th:value="${c}"></option>
+            </datalist>
+            <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Error</p>
+        </div>
+
+        <div class="field">
+            <label for="notes">Notes <span class="optional">(optional)</span></label>
+            <textarea id="notes" th:field="*{notes}" rows="3"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" th:text="${submitLabel}">Add expense</button>
+            <a class="btn btn-ghost" th:href="@{/expenses}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
